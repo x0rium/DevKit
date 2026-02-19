@@ -16,13 +16,14 @@ import { createEscalation, type EscalationLevel } from './escalate.js';
 import { analyzeCoverage, formatCoverage } from './coverage.js';
 import { watchValidate } from './watch.js';
 import { startDashboard } from './dashboard.js';
+import { takeSnapshot, saveSnapshot, listSnapshots, loadSnapshot, diffSnapshots, formatDiff } from './diff.js';
 
 const program = new Command();
 
 program
     .name('devkit')
     .description('DevKit CLI — AI-Native Development Methodology')
-    .version('0.4.0');
+    .version('0.5.0');
 
 // ────────────────────────────── INIT ──────────────────────────────
 program
@@ -563,9 +564,110 @@ program
         startDashboard(cwd, port);
     });
 
+// ────────────────────────────── SNAPSHOT ──────────────────────────────
+program
+    .command('snapshot')
+    .description('Save a snapshot of current .devkit/ state for future diff')
+    .option('-d, --dir <path>', 'Project directory', process.cwd())
+    .action((opts) => {
+        const cwd = opts.dir as string;
+        console.log(chalk.bold('\n📸 Snapshot\n'));
+
+        const snapshot = takeSnapshot(cwd);
+        const fileName = saveSnapshot(cwd, snapshot);
+
+        console.log(`  ✅ Saved: ${fileName}`);
+        console.log(`     Phase: ${snapshot.phase}`);
+        console.log(`     Files: ${Object.keys(snapshot.files).length}`);
+        console.log(`     Invariants: ${snapshot.invariantCount} tech + ${snapshot.uxInvariantCount} UX`);
+        console.log(`     Coverage: ${snapshot.coveragePercent}%`);
+        console.log(`\n  Use "devkit diff" to compare with next snapshot.`);
+        console.log('');
+    });
+
+// ────────────────────────────── SNAPSHOT LIST ──────────────────────────────
+program
+    .command('snapshot-list')
+    .description('List all saved snapshots')
+    .option('-d, --dir <path>', 'Project directory', process.cwd())
+    .action((opts) => {
+        const cwd = opts.dir as string;
+        const snapshots = listSnapshots(cwd);
+
+        console.log(chalk.bold('\n📸 Snapshots\n'));
+
+        if (snapshots.length === 0) {
+            console.log('  No snapshots yet. Run "devkit snapshot" to save one.\n');
+            return;
+        }
+
+        for (let i = 0; i < snapshots.length; i++) {
+            const s = loadSnapshot(cwd, snapshots[i]!);
+            const idx = chalk.dim(`[${i}]`);
+            console.log(`  ${idx} ${snapshots[i]}`);
+            console.log(`      Phase: ${s.phase} │ Files: ${Object.keys(s.files).length} │ Coverage: ${s.coveragePercent}%`);
+        }
+        console.log('');
+    });
+
+// ────────────────────────────── DIFF ──────────────────────────────
+program
+    .command('diff')
+    .description('Compare two snapshots or last snapshot vs current state')
+    .argument('[from]', 'Snapshot index or filename (default: last saved)')
+    .argument('[to]', 'Snapshot index or filename (default: current state)')
+    .option('-d, --dir <path>', 'Project directory', process.cwd())
+    .action((fromArg, toArg, opts) => {
+        const cwd = opts.dir as string;
+        console.log(chalk.bold('\n🔍 Diff\n'));
+
+        const snapshots = listSnapshots(cwd);
+
+        let fromSnapshot: ReturnType<typeof takeSnapshot>;
+        let toSnapshot: ReturnType<typeof takeSnapshot>;
+
+        // Resolve FROM
+        if (fromArg !== undefined) {
+            const idx = parseInt(fromArg, 10);
+            if (!isNaN(idx) && idx >= 0 && idx < snapshots.length) {
+                fromSnapshot = loadSnapshot(cwd, snapshots[idx]!);
+            } else if (snapshots.includes(fromArg)) {
+                fromSnapshot = loadSnapshot(cwd, fromArg);
+            } else {
+                console.log(`  ❌ Snapshot not found: ${fromArg}`);
+                console.log('  Run "devkit snapshot-list" to see available snapshots.\n');
+                return;
+            }
+        } else if (snapshots.length > 0) {
+            fromSnapshot = loadSnapshot(cwd, snapshots[snapshots.length - 1]!);
+        } else {
+            console.log('  ❌ No snapshots found. Run "devkit snapshot" first.\n');
+            return;
+        }
+
+        // Resolve TO
+        if (toArg !== undefined) {
+            const idx = parseInt(toArg, 10);
+            if (!isNaN(idx) && idx >= 0 && idx < snapshots.length) {
+                toSnapshot = loadSnapshot(cwd, snapshots[idx]!);
+            } else if (snapshots.includes(toArg)) {
+                toSnapshot = loadSnapshot(cwd, toArg);
+            } else {
+                console.log(`  ❌ Snapshot not found: ${toArg}`);
+                return;
+            }
+        } else {
+            // Default: current state
+            toSnapshot = takeSnapshot(cwd);
+        }
+
+        const result = diffSnapshots(fromSnapshot, toSnapshot);
+        console.log(formatDiff(result));
+    });
+
 // ────────────────────────────── HELP (progressive disclosure) ──────────────────────────────
 function getPhaseCommands(phase: Phase): string[] {
-    const always = ['status', 'validate', 'gate', 'advance', 'coverage', 'dashboard'];
+    const always = ['status', 'validate', 'gate', 'advance', 'coverage', 'dashboard', 'snapshot', 'diff'];
 
     const phaseSpecific: Record<Phase, string[]> = {
         research: [],

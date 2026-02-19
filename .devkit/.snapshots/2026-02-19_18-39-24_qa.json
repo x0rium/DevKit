@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-02-19T18:39:24.740Z",
+  "phase": "qa",
+  "files": {
+    "STATUS.md": "4b215f4f4cbc",
+    "arch/constitution.md": "5171e3735a51",
+    "arch/decisions/INV-001.md": "5c4f26e21ec3",
+    "arch/decisions/RFC-001.md": "b0f4d0157ea3",
+    "product/roadmap.md": "1ae2f8f1a8a2",
+    "product/users.md": "0956578c47fe",
+    "product/ux_invariants.md": "99730d72fcb5",
+    "qa/escalations/ESC-001.md": "9c761d095804",
+    "qa/test_contracts.md": "a395740a0e2e",
+    "research/assumptions.md": "54fc7bc27c30",
+    "research/feasibility.md": "cadeddcae1ae",
+    "research/market.md": "e0f785db98ec",
+    "research/unknowns.md": "3aebc20f07d6"
+  },
+  "invariantCount": 0,
+  "uxInvariantCount": 6,
+  "adrCount": 0,
+  "rfcCount": 1,
+  "invCount": 1,
+  "escCount": 1,
+  "coveragePercent": 100
+}
