@@ -1,8 +1,16 @@
 {
   "name": "devkit-cli",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "CLI for DevKit — AI-Native Development Methodology",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/x0rium/DevKit"
+  },
+  "homepage": "https://github.com/x0rium/DevKit#readme",
   "bin": {
     "devkit": "./dist/index.js"
   },
@@ -24,15 +32,16 @@
     "node": ">=18"
   },
   "dependencies": {
-    "commander": "^13.1.0",
-    "chalk": "^5.4.1",
-    "gray-matter": "^4.0.3",
     "ajv": "^8.17.1",
-    "glob": "^11.0.1"
+    "chalk": "^5.4.1",
+    "chokidar": "^5.0.0",
+    "commander": "^13.1.0",
+    "glob": "^11.0.1",
+    "gray-matter": "^4.0.3"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "typescript": "^5.7.0",
-    "vitest": "^3.0.0",
-    "@types/node": "^22.0.0"
+    "vitest": "^3.0.0"
   }
 }

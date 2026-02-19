@@ -13,13 +13,16 @@ import { advancePhase } from './advance.js';
 import { createRfc, listRfcs, resolveRfc } from './rfc.js';
 import { createInvestigation, listInvestigations, resolveInvestigation } from './investigate.js';
 import { createEscalation, type EscalationLevel } from './escalate.js';
+import { analyzeCoverage, formatCoverage } from './coverage.js';
+import { watchValidate } from './watch.js';
+import { startDashboard } from './dashboard.js';
 
 const program = new Command();
 
 program
     .name('devkit')
     .description('DevKit CLI — AI-Native Development Methodology')
-    .version('0.3.0');
+    .version('0.4.0');
 
 // ────────────────────────────── INIT ──────────────────────────────
 program
@@ -525,9 +528,44 @@ program
         console.log('');
     });
 
+// ────────────────────────────── COVERAGE ──────────────────────────────
+program
+    .command('coverage')
+    .description('Show invariant ↔ test coverage map')
+    .option('-d, --dir <path>', 'Project directory', process.cwd())
+    .action((opts) => {
+        const cwd = opts.dir as string;
+        console.log(chalk.bold('\n📊 Coverage Map\n'));
+
+        const result = analyzeCoverage(cwd);
+        console.log(formatCoverage(result));
+    });
+
+// ────────────────────────────── VALIDATE --WATCH ──────────────────────────────
+program
+    .command('watch')
+    .description('Watch .devkit/ and re-validate on changes')
+    .option('-d, --dir <path>', 'Project directory', process.cwd())
+    .action((opts) => {
+        const cwd = opts.dir as string;
+        watchValidate(cwd);
+    });
+
+// ────────────────────────────── DASHBOARD ──────────────────────────────
+program
+    .command('dashboard')
+    .description('Open web dashboard with status, coverage, and escalations')
+    .option('-d, --dir <path>', 'Project directory', process.cwd())
+    .option('-p, --port <port>', 'Port number', '3141')
+    .action((opts) => {
+        const cwd = opts.dir as string;
+        const port = parseInt(opts.port as string, 10);
+        startDashboard(cwd, port);
+    });
+
 // ────────────────────────────── HELP (progressive disclosure) ──────────────────────────────
 function getPhaseCommands(phase: Phase): string[] {
-    const always = ['status', 'validate', 'gate', 'advance'];
+    const always = ['status', 'validate', 'gate', 'advance', 'coverage', 'dashboard'];
 
     const phaseSpecific: Record<Phase, string[]> = {
         research: [],
