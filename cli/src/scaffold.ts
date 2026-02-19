@@ -1,5 +1,6 @@
-import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { mkdirSync, writeFileSync, existsSync, cpSync, readdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const STATUS_TEMPLATE = `# DevKit Status
 
@@ -25,17 +26,39 @@ const DIRECTORIES = [
     '.devkit/qa/escalations',
 ];
 
+const SKILL_NAMES = [
+    'devkit-init',
+    'research-kit',
+    'product-kit',
+    'arch-kit',
+    'spec-kit',
+    'qa-kit',
+];
+
 export interface ScaffoldResult {
     created: string[];
     skipped: string[];
     mode: string;
+    skillsInstalled: number;
+}
+
+function getSkillsSourceDir(): string | null {
+    // Skills are bundled at cli/skills/ relative to the package root
+    const thisFile = fileURLToPath(import.meta.url);
+    const distDir = dirname(thisFile);       // cli/dist/
+    const cliRoot = dirname(distDir);        // cli/
+    const skillsDir = join(cliRoot, 'skills');
+
+    if (existsSync(skillsDir)) return skillsDir;
+    return null;
 }
 
 export function scaffoldDevkit(cwd: string, mode: string): ScaffoldResult {
     const created: string[] = [];
     const skipped: string[] = [];
+    let skillsInstalled = 0;
 
-    // Create directories
+    // Create .devkit/ directories
     for (const dir of DIRECTORIES) {
         const fullPath = join(cwd, dir);
         if (!existsSync(fullPath)) {
@@ -59,5 +82,25 @@ export function scaffoldDevkit(cwd: string, mode: string): ScaffoldResult {
         skipped.push('.devkit/STATUS.md');
     }
 
-    return { created, skipped, mode };
+    // Install Agent Skills → .agent/skills/
+    const skillsSource = getSkillsSourceDir();
+    if (skillsSource) {
+        const agentSkillsDir = join(cwd, '.agent', 'skills');
+        mkdirSync(agentSkillsDir, { recursive: true });
+
+        for (const skillName of SKILL_NAMES) {
+            const src = join(skillsSource, skillName);
+            const dest = join(agentSkillsDir, skillName);
+
+            if (existsSync(src) && !existsSync(dest)) {
+                cpSync(src, dest, { recursive: true });
+                created.push(`.agent/skills/${skillName}/`);
+                skillsInstalled++;
+            } else if (existsSync(dest)) {
+                skipped.push(`.agent/skills/${skillName}/`);
+            }
+        }
+    }
+
+    return { created, skipped, mode, skillsInstalled };
 }

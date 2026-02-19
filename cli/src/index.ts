@@ -23,7 +23,7 @@ const program = new Command();
 program
     .name('devkit')
     .description('DevKit CLI — AI-Native Development Methodology')
-    .version('0.5.0');
+    .version('0.6.0');
 
 // ────────────────────────────── INIT ──────────────────────────────
 program
@@ -56,6 +56,10 @@ program
             for (const path of result.skipped) {
                 console.log(chalk.dim(`    - ${path}`));
             }
+        }
+
+        if (result.skillsInstalled > 0) {
+            console.log(chalk.green(`\n  🧠 Agent Skills: ${result.skillsInstalled} installed → .agent/skills/`));
         }
 
         console.log('');
