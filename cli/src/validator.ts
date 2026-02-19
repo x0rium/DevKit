@@ -212,7 +212,7 @@ export function formatValidation(result: ValidationResult): string {
         lines.push(`  📄 ${file}`);
         for (const err of errs) {
             const loc = err.line > 0 ? `:${err.line}` : '';
-            lines.push(`     ✖ ${err.message}`);
+            lines.push(`     ✖ ${err.message} (line${loc})`);
             lines.push(`       → Fix: ${err.fix}`);
         }
         lines.push('');

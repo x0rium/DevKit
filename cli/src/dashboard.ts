@@ -5,7 +5,12 @@ import { analyzeCoverage } from './coverage.js';
 import { listRfcs } from './rfc.js';
 import { listInvestigations } from './investigate.js';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
+const VERSION = pkg.version as string;
 
 export function startDashboard(cwd: string, port: number): void {
   const server = createServer((req, res) => {
@@ -270,7 +275,7 @@ function generateHtml(): string {
 <body>
   <div class="header">
     <h1>⬡ DevKit Dashboard</h1>
-    <span class="version">v0.4.0</span>
+    <span class="version">v${VERSION}</span>
     <span class="refresh" id="refresh-time">Loading...</span>
   </div>
 

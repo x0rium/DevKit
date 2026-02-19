@@ -239,7 +239,16 @@ export function checkGate(cwd: string, currentPhase: Phase): GateResult {
     };
 
     const checker = checkers[currentPhase];
-    const conditions = checker ? checker(devkitDir) : [];
+    let conditions: GateCondition[];
+    try {
+        conditions = checker ? checker(devkitDir) : [];
+    } catch (err) {
+        conditions = [{
+            description: 'Gate check execution',
+            satisfied: false,
+            detail: `Gate checker failed: ${err instanceof Error ? err.message : String(err)}`,
+        }];
+    }
     const allowed = conditions.length > 0 && conditions.every(c => c.satisfied);
 
     return {

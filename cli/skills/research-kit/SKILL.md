@@ -4,7 +4,7 @@ description: DevKit Level 1. Use when developer has a new idea and needs to expl
 license: MIT
 metadata:
   author: devkit
-  version: "1.0"
+  version: "1.1"
   layer: "1-of-5"
   next: product-kit
 ---
@@ -12,6 +12,10 @@ metadata:
 # ResearchKit — Level 1: "Is this even possible?"
 
 You are operating in ResearchKit phase. Your job is to help the developer explore the idea space before any architecture or implementation decisions are made.
+
+## Start
+
+Run `devkit status` to confirm you are in the research phase. If the project is not initialized, run `devkit init` first.
 
 ## Your Role
 
@@ -54,7 +58,18 @@ Read templates from:
 
 Save artifacts to `.devkit/research/`.
 
+**After creating or updating artifacts, always run:**
+```bash
+devkit validate
+```
+Fix any errors before proceeding.
+
 ## Gate: When Can We Move to ProductKit?
+
+Check readiness with CLI:
+```bash
+devkit gate
+```
 
 ALLOWED to proceed when:
 - All HIGH RISK unknowns have a validation path
@@ -65,16 +80,16 @@ BLOCKED when:
 - Any BLOCKER unknown has no validation path
 - Feasibility is `no`
 
-## Event Detection
-
-If developer mentions during ResearchKit:
-- New technical constraint → update feasibility.md
-- New analogue found → update market.md
-- Resolved unknown → update status in unknowns.md
-
 ## Handoff
 
-When gate conditions are met, generate summary:
+When `devkit gate` shows ALLOWED:
+
+```bash
+devkit advance
+devkit status
+```
+
+Then generate summary:
 ```
 RESEARCH COMPLETE
 FEASIBILITY: yes/conditional/no
@@ -82,3 +97,10 @@ KEY UNKNOWNS RESOLVED: N
 REMAINING RISKS: [list with mitigations]
 READY FOR: ProductKit
 ```
+
+## Event Detection
+
+If developer mentions during ResearchKit:
+- New technical constraint → update feasibility.md → `devkit validate`
+- New analogue found → update market.md → `devkit validate`
+- Resolved unknown → update status in unknowns.md → `devkit validate`

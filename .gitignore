@@ -1,1 +1,3 @@
-.specify/
+# spec-kit working files (exclude all except constitution.md)
+.specify/*
+!.specify/constitution.md

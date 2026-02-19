@@ -83,10 +83,14 @@ export function createEscalation(cwd: string, description: string, forceLevel?: 
         ? { level: forceLevel, reason: `Manually escalated to ${forceLevel}.` }
         : detectEscalationLevel(cwd, description);
 
-    // Generate ID
+    // Generate ID (use max suffix to avoid collisions after deletions)
     const existingFiles = existsSync(escalationsDir) ? readdirSync(escalationsDir).filter(f => f.startsWith('ESC-')) : [];
-    const nextNum = existingFiles.length + 1;
-    const id = `ESC-${nextNum.toString().padStart(3, '0')}`;
+    let maxNum = 0;
+    for (const f of existingFiles) {
+        const m = f.match(/ESC-(\d+)/);
+        if (m) maxNum = Math.max(maxNum, parseInt(m[1]!, 10));
+    }
+    const id = `ESC-${(maxNum + 1).toString().padStart(3, '0')}`;
     const filename = `${id}.md`;
     const filePath = join(escalationsDir, filename);
     const today = new Date().toISOString().split('T')[0];

@@ -130,10 +130,10 @@ STATUS: assumed / confirmed / rejected
 ## Команды
 
 ```
-/research init "описание идеи"
-/research market
-/research feasibility  
-/research unknowns
-/research validate "unknown name" "результат проверки"
-/research status      ← можно ли переходить к ProductKit
+/research-kit init "описание идеи"
+/research-kit market
+/research-kit feasibility
+/research-kit unknowns
+/research-kit validate "unknown name" "результат проверки"
+/research-kit status      ← можно ли переходить к ProductKit
 ```

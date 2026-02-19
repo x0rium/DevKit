@@ -23,7 +23,7 @@ QAKit проверяет:
 
 ```
 .devkit/arch/invariants.md       → test_contracts.md
-.devkit/product/ux_invariants.md → ux_test_contracts.md
+.devkit/product/ux_invariants.md → test_contracts.md (UX section)
 .devkit/research/assumptions.md  → assumption_checks.md
 .specify/specs/                  → spec coverage
 ```
@@ -111,18 +111,6 @@ CRITICALITY: blocker / major / minor
 COVERAGE: covered / not-covered
 ```
 
-### ux_test_contracts.md
-```markdown
-# UX Test Contracts
-
-## TC-U1: [название UX инварианта]
-INVARIANT: U1 из ux_invariants.md
-SCENARIO: пользовательский сценарий для проверки
-WHAT: что наблюдаем
-VIOLATION: что считается нарушением
-METHOD: usability test / metric / manual review
-```
-
 ### assumption_checks.md
 ```markdown
 # Assumption Validation
@@ -180,9 +168,9 @@ ESC-XXX.md  ← история каждой эскалации
 ## Команды
 
 ```
-/qa init                    ← генерация контрактов из инвариантов
-/qa coverage                ← анализ текущего покрытия
-/qa check-assumptions       ← валидация assumptions против реальности
-/qa escalate "описание"     ← ручная эскалация
-/qa status                  ← можно ли в production
+/qa-kit init                ← генерация контрактов из инвариантов
+/qa-kit coverage            ← анализ текущего покрытия
+/qa-kit check-assumptions   ← валидация assumptions против реальности
+/qa-kit escalate "описание" ← ручная эскалация
+/qa-kit status              ← можно ли в production
 ```

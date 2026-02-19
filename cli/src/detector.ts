@@ -8,7 +8,10 @@ const CODE_EXTENSIONS = new Set([
     '.c', '.cpp', '.h', '.cs', '.rb', '.php', '.swift', '.kt',
 ]);
 
-function hasCodeFiles(dir: string): boolean {
+const MAX_SCAN_DEPTH = 5;
+
+function hasCodeFiles(dir: string, depth = 0): boolean {
+    if (depth >= MAX_SCAN_DEPTH) return false;
     try {
         const entries = readdirSync(dir, { withFileTypes: true });
         for (const entry of entries) {
@@ -21,7 +24,7 @@ function hasCodeFiles(dir: string): boolean {
             }
 
             if (entry.isDirectory()) {
-                if (hasCodeFiles(join(dir, entry.name))) return true;
+                if (hasCodeFiles(join(dir, entry.name), depth + 1)) return true;
             }
         }
     } catch {

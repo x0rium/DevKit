@@ -15,17 +15,15 @@ function getNextId(dir: string, prefix: string): string {
     if (!existsSync(dir)) return `${prefix}001`;
 
     const files = readdirSync(dir)
-        .filter(f => f.startsWith(prefix) && f.endsWith('.md'))
-        .sort();
+        .filter(f => f.startsWith(prefix) && f.endsWith('.md'));
 
-    if (files.length === 0) return `${prefix}001`;
+    let maxNum = 0;
+    for (const f of files) {
+        const m = f.match(new RegExp(`${prefix}(\\d+)`));
+        if (m) maxNum = Math.max(maxNum, parseInt(m[1]!, 10));
+    }
 
-    const last = files[files.length - 1]!;
-    const numMatch = last.match(new RegExp(`${prefix}(\\d+)`));
-    if (!numMatch) return `${prefix}001`;
-
-    const next = parseInt(numMatch[1]!, 10) + 1;
-    return `${prefix}${next.toString().padStart(3, '0')}`;
+    return `${prefix}${(maxNum + 1).toString().padStart(3, '0')}`;
 }
 
 function findBrokenAssumption(

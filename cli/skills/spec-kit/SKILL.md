@@ -4,7 +4,7 @@ description: DevKit Level 4. Use when architecture is verified and it's time to 
 license: MIT
 metadata:
   author: devkit
-  version: "1.0"
+  version: "1.1"
   layer: "4-of-5"
   prev: arch-kit
   next: qa-kit
@@ -13,6 +13,14 @@ metadata:
 # SpecKit — Level 4: "Build it."
 
 You are operating in SpecKit phase. Architecture is verified. You have a constitution.md. Now you build — using the github/spec-kit workflow as the implementation engine.
+
+## Start
+
+```bash
+devkit status
+```
+
+Confirm you are in the spec phase. If not, check gate status of the previous phase.
 
 ## Your Role
 
@@ -24,7 +32,12 @@ You are operating in SpecKit phase. Architecture is verified. You have a constit
 ## Constitution
 
 Before any spec work, confirm constitution.md exists at `.specify/constitution.md`.
-If it doesn't exist, stop and run: `/arch-kit generate-constitution`
+If it doesn't exist, stop and run:
+
+```bash
+devkit generate-constitution
+devkit sync
+```
 
 The constitution comes from ArchKit — do not edit it manually. It contains the verified invariants that all specs must respect.
 
@@ -50,7 +63,12 @@ TECHNICAL: [I1, I3] from .devkit/arch/invariants.md
 UX: [U2] from .devkit/product/ux_invariants.md
 ```
 
-If implementation requires deviating from an invariant → STOP. Do not implement. Open RFC.
+If implementation requires deviating from an invariant → STOP. Do not implement. Open RFC:
+
+```bash
+devkit impact "description of deviation"
+devkit rfc "description"
+```
 
 ## Event Detection — CRITICAL
 
@@ -63,7 +81,12 @@ Action:
 > "This sounds like a new requirement. Let me check if it touches our invariants.
 > [read .devkit/arch/invariants.md]
 > This affects invariant [I_N]. I need to open an RFC before continuing.
-> Estimated impact: [N specs affected]. Proceed with RFC? /arch-kit rfc"
+> Estimated impact: [N specs affected]. Proceed with RFC?"
+
+```bash
+devkit impact "new requirement description"
+devkit rfc "description"
+```
 
 Do NOT continue spec work until RFC is resolved.
 
@@ -73,8 +96,11 @@ Patterns: "bug in library", "this doesn't support", "benchmark shows", "unexpect
 Action:
 > "This breaks an architectural assumption. Let me identify which one.
 > [read .devkit/arch/decisions/ADR-*.md]
-> This breaks the assumption in [ADR-N]. Opening Investigation.
-> /arch-kit investigate"
+> This breaks the assumption in [ADR-N]. Opening Investigation."
+
+```bash
+devkit investigate "description of blocker"
+```
 
 Do NOT work around the blocker silently.
 
@@ -91,14 +117,42 @@ Do NOT continue with the current design.
 ### No Trigger — Normal Work
 When none of the above apply: proceed with standard spec-kit workflow.
 
+**After creating or updating artifacts, always run:**
+```bash
+devkit validate
+```
+Fix any errors before proceeding.
+
 ## Spec Numbering
 
 Specs are numbered sequentially: spec_001, spec_002, etc.
 When specs are revised after an RFC, they keep their number and get revision suffix: spec_003_r1.
 
-## Handoff to QAKit
+## Gate: When Can We Move to QAKit?
 
-After implementation of a feature or milestone:
+```bash
+devkit gate
+```
+
+ALLOWED when:
+- All specs implemented and passing
+- No open RFCs or Investigations
+- Invariant coverage declared for each spec
+
+BLOCKED when:
+- Open RFC or Investigation exists
+- Spec violates invariant without RFC resolution
+
+## Handoff
+
+When `devkit gate` shows ALLOWED:
+
+```bash
+devkit advance
+devkit status
+```
+
+Then generate summary:
 ```
 IMPLEMENTATION COMPLETE
 SPECS: [list]

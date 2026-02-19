@@ -33,7 +33,7 @@ FEATURES:
   - `devkit escalate` — QA эскалация с автоопределением уровня
   - Интеграция с spec-kit CLI (если доступен)
   - Dashboard в браузере (`devkit dashboard`)
-  - Watch mode для валидации (`devkit validate --watch`)
+  - Watch mode для валидации (`devkit watch`)
 
 ## Never (anti-scope)
   - IDE плагин (Agent Skills достаточно)

@@ -8,6 +8,6 @@ CURRENT_PHASE: qa
 ## Phase Status
 - [x] ResearchKit
 - [x] ProductKit
-- [ ] ArchKit
+- [x] ArchKit
 - [x] SpecKit
 - [x] QAKit

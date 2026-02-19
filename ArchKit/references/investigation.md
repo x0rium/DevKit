@@ -34,4 +34,4 @@ DATE_DECIDED:
 - [ ] Update affected ADR or create new one
 - [ ] Update invariants.md if changed
 - [ ] Update affected specs
-- [ ] Document any technical debt in debt.md
+- [ ] Document any technical debt

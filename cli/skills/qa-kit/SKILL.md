@@ -4,7 +4,7 @@ description: DevKit Level 5. Use after implementation to verify the system again
 license: MIT
 metadata:
   author: devkit
-  version: "1.0"
+  version: "1.1"
   layer: "5-of-5"
   prev: spec-kit
 ---
@@ -12,6 +12,14 @@ metadata:
 # QAKit — Level 5: "Does it work the way we decided?"
 
 You are operating in QAKit phase. Your job is not just to find bugs — it is to verify the system against every level of decisions made in DevKit.
+
+## Start
+
+```bash
+devkit status
+```
+
+Confirm you are in the qa phase. If not, check gate status of the previous phase.
 
 ## Your Role
 
@@ -44,9 +52,19 @@ For each invariant, generate a test contract:
 
 Save to `.devkit/qa/test_contracts.md`.
 
+**After creating contracts, validate:**
+```bash
+devkit validate
+```
+
 ### Phase 2: Coverage Analysis
 Map every invariant to its test contract.
 Identify uncovered invariants — these are explicit technical debt.
+
+```bash
+devkit coverage
+```
+
 Save to `.devkit/qa/coverage_map.md`.
 
 ### Phase 3: Assumption Validation
@@ -54,6 +72,10 @@ Read `.devkit/research/assumptions.md`.
 For each assumption, check whether reality confirmed or rejected it.
 Rejected assumptions → escalate to ResearchKit.
 Save findings to `.devkit/qa/assumption_checks.md`.
+
+```bash
+devkit validate
+```
 
 ## Artifacts to Produce
 
@@ -63,6 +85,12 @@ Read templates from:
 - [Assumption checks template](references/assumption_checks.md)
 
 Save to `.devkit/qa/`.
+
+**After creating or updating artifacts, always run:**
+```bash
+devkit validate
+```
+Fix any errors before proceeding.
 
 ## Escalation Logic
 
@@ -87,13 +115,22 @@ Did a research assumption prove false in production?
 ```
 
 ### Step 3: Document the escalation
-Create `.devkit/qa/escalations/ESC-XXX.md`:
+
+```bash
+devkit escalate "description of failure"
+```
+
+This creates `.devkit/qa/escalations/ESC-XXX.md`. Fill in:
 - What was found
 - Which level it escalated to
 - What decision was triggered
 - Resolution
 
 ## Gate: Ready for Production?
+
+```bash
+devkit gate
+```
 
 ALLOWED when:
 - All BLOCKER test contracts pass
@@ -103,6 +140,11 @@ ALLOWED when:
 BLOCKED when:
 - Any BLOCKER contract fails
 - Open blocker-level escalation exists
+
+Check coverage threshold:
+```bash
+devkit coverage
+```
 
 ## Continuous QA
 

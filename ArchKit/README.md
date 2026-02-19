@@ -85,16 +85,24 @@ Triggered: когда новые требования затрагивают и�
 ```markdown
 # RFC-XXX: [название]
 
-TRIGGER: что изменилось
-AFFECTED_INVARIANTS: [список]
-AFFECTED_SPECS: [список]
-COST: оценка стоимости изменения
+TRIGGERED_BY: что изменилось
 
-OPTIONS:
-  A: ...
-  B: ...
+## Affected Invariants
+[список]
 
-DECISION: [выбранный вариант]
+## Affected Specs
+[список]
+
+## Change Cost
+SPECS_TO_REVISE: N
+INVARIANTS_TO_CHANGE: M
+
+## Options
+### Option A: ...
+### Option B: ...
+
+## Decision
+CHOSEN: [выбранный вариант]
 RATIONALE: почему
 STATUS: open / accepted / rejected
 ```
@@ -102,21 +110,20 @@ STATUS: open / accepted / rejected
 ### Investigation (технический блокер)
 Triggered: баг в либе / провал бенчмарка / неожиданное ограничение
 ```markdown
-# Investigation-XXX: [название]
+# INV-XXX: [название]
 
-TRIGGER: что произошло
-AFFECTED_ASSUMPTION: [ADR который сломался]
-FINDING: что обнаружили
+TRIGGERED_BY: что произошло
+ASSUMPTION_IN: [ADR который сломался]
+REALITY: что обнаружили
 
-OPTIONS:
-  A: ...
-  B: ...
-  C: ...
+## Options
+### Option A: ...
+### Option B: ...
+### Option C: ...
 
-DECISION: [выбранный вариант]
-INVARIANTS_AFFECTED: none / [список]
-SPECS_AFFECTED: [список]
-TECHNICAL_DEBT: none / [описание]
+## Decision
+CHOSEN: [выбранный вариант]
+RATIONALE: почему
 STATUS: open / resolved
 ```
 
@@ -183,13 +190,13 @@ INV-XXX.md      ← Investigation
 ## Команды
 
 ```
-/arch init
-/arch discovery
-/arch variants
-/arch specify
-/arch verify
-/arch rfc "описание изменения"
-/arch investigate "описание блокера"
-/arch generate-constitution
-/arch status
+/arch-kit init
+/arch-kit discovery
+/arch-kit variants
+/arch-kit specify
+/arch-kit verify
+/arch-kit rfc "описание изменения"
+/arch-kit investigate "описание блокера"
+/arch-kit generate-constitution
+/arch-kit status
 ```

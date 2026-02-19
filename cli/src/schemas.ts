@@ -106,8 +106,8 @@ export const STRUCTURED_FIELDS: Record<string, string[]> = {
     'invariant': ['STATEMENT', 'RATIONALE', 'VERIFICATION', 'FAILURE_MODE', 'STATUS'],
     'ux_invariant': ['STATEMENT', 'RATIONALE', 'VALIDATION', 'PRIORITY', 'STATUS'],
     'adr': ['CONTEXT', 'DECISION', 'CONSEQUENCES'],
-    'rfc': ['TRIGGER', 'AFFECTED_INVARIANTS', 'OPTIONS', 'STATUS'],
-    'investigation': ['TRIGGER', 'AFFECTED_ASSUMPTION', 'FINDING', 'OPTIONS', 'STATUS'],
+    'rfc': ['TRIGGERED_BY', 'STATUS'],
+    'investigation': ['TRIGGERED_BY', 'ASSUMPTION_IN', 'REALITY', 'STATUS'],
     'test_contract': ['INVARIANT', 'WHAT', 'HOW', 'VIOLATION', 'CRITICALITY'],
 };
 

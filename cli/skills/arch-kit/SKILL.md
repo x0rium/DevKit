@@ -4,7 +4,7 @@ description: DevKit Level 3. Use after ProductKit to explore architecture varian
 license: MIT
 metadata:
   author: devkit
-  version: "1.0"
+  version: "1.1"
   layer: "3-of-5"
   prev: product-kit
   next: spec-kit
@@ -13,6 +13,14 @@ metadata:
 # ArchKit — Level 3: "How is this technically structured?"
 
 You are operating in ArchKit phase. Your job is to explore architecture options, establish technical invariants, verify the design, and produce a verified foundation for SpecKit.
+
+## Start
+
+```bash
+devkit status
+```
+
+Confirm you are in the arch phase. If not, check gate status of the previous phase.
 
 ## Your Role
 
@@ -57,6 +65,21 @@ Formalize the chosen architecture:
 - Failure modes and how each is handled
 - Explicit OPEN_QUESTIONS that block progress
 
+Before creating an RFC for a change, check what it affects:
+```bash
+devkit impact "description of change"
+```
+
+To create an RFC:
+```bash
+devkit rfc "description"
+```
+
+To open an investigation:
+```bash
+devkit investigate "description"
+```
+
 ### Phase 4: Adversarial Verification
 Play the role of a hostile environment. For every critical path, ask:
 - What if this service crashes mid-transaction?
@@ -81,7 +104,18 @@ Read templates from:
 - [Impact map template](references/impact.md)
 
 Save to `.devkit/arch/`.
-Generate `.devkit/arch/constitution.md` → copy to `.specify/constitution.md`.
+
+Generate constitution and sync:
+```bash
+devkit generate-constitution
+devkit sync
+```
+
+**After creating or updating artifacts, always run:**
+```bash
+devkit validate
+```
+Fix any errors before proceeding.
 
 ## Event Detection During SpecKit
 
@@ -92,7 +126,12 @@ Check invariants.md. If any invariant is touched:
 > "This touches invariant [I_N]. I'm stopping SpecKit and opening an RFC.
 > Here's what's affected and the cost of the change."
 
-Create `arch/decisions/RFC-XXX.md`. Run delta ArchKit cycle. Resume SpecKit only after RFC is resolved.
+```bash
+devkit impact "description of change"
+devkit rfc "description"
+```
+
+Run delta ArchKit cycle. Resume SpecKit only after RFC is resolved.
 
 ### Investigation Trigger
 Developer says: "found a bug in lib X", "benchmark failed", "this doesn't work as expected", "library doesn't support Y"
@@ -100,9 +139,24 @@ Developer says: "found a bug in lib X", "benchmark failed", "this doesn't work a
 Check which ADR this breaks:
 > "This breaks assumption in [ADR-N]. Opening Investigation."
 
-Create `arch/decisions/INV-XXX.md`. Present options with costs. Developer decides. Update affected specs.
+```bash
+devkit investigate "description"
+```
+
+Present options with costs. Developer decides. Update affected specs.
+
+After resolving, regenerate constitution if invariants changed:
+```bash
+devkit generate-constitution
+devkit sync
+devkit validate
+```
 
 ## Gate: When Can We Move to SpecKit?
+
+```bash
+devkit gate
+```
 
 ALLOWED when:
 - All adversarial scenarios have answers
@@ -118,6 +172,14 @@ BLOCKED when:
 
 ## Handoff
 
+When `devkit gate` shows ALLOWED:
+
+```bash
+devkit advance
+devkit status
+```
+
+Then generate summary:
 ```
 ARCHITECTURE VERIFIED
 VARIANT CHOSEN: [name and one-line rationale]

@@ -112,11 +112,11 @@ CURRENT_PHASE: arch-review
 ## Reconstruction Summary
 INVARIANTS_INFERRED: N
 DECISIONS_INFERRED: M  
-GAPS: K (see arch/gaps.md)
+GAPS: K (see Phase 4: Gap Analysis)
 
 ## Required Actions Before Development
 - [ ] Review and confirm invariants.md
-- [ ] Fill gaps in arch/gaps.md
+- [ ] Review gaps from Phase 4: Gap Analysis
 - [ ] Run /arch-kit to verify and fill missing decisions
 
 ## Phase Status
@@ -139,7 +139,7 @@ Reconstructed from your codebase:
 
 Next steps:
 1. Review .devkit/arch/invariants.md — confirm or correct each one
-2. Check .devkit/arch/gaps.md — fill what you remember
+2. Check .devkit/the Gap Analysis section below — fill what you remember
 3. Run /arch-kit to verify architecture and fill remaining gaps
 
 Important: 'inferred' invariants are AI's best guess from code.

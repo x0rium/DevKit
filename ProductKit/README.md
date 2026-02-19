@@ -127,9 +127,9 @@ EXCLUDES: [что явно не входит]
 ## Команды
 
 ```
-/product init
-/product users
-/product ux-invariants
-/product roadmap
-/product status
+/product-kit init
+/product-kit users
+/product-kit ux-invariants
+/product-kit roadmap
+/product-kit status
 ```

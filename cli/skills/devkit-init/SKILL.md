@@ -4,54 +4,38 @@ description: Initialize DevKit in any project. Use when developer wants to start
 license: MIT
 metadata:
   author: devkit
-  version: "1.0"
+  version: "1.1"
 ---
 
 # DevKit Init
 
 Initialize DevKit for any project state. Detect what exists, choose the right mode, set up what's needed.
 
-## Step 1: Detect Project State
+## Step 1: Run CLI Init
 
-Check what exists in the current directory:
+Run the CLI command — it auto-detects project state and creates the structure:
 
-```
-Check for:
-  .devkit/          → already initialized
-  .specify/         → spec-kit exists, no DevKit
-  source code files → brownfield (code without DevKit)
-  empty directory   → greenfield
+```bash
+devkit init
 ```
 
-Based on findings, choose mode:
+This will:
+- Detect project state (greenfield / brownfield / upgrade / already initialized)
+- Create `.devkit/` directory structure
+- Generate `STATUS.md` with correct mode and phase
+- Report what was created vs skipped
 
-| State | Mode |
-|-------|------|
-| .devkit/ exists | Already initialized → show status |
-| .specify/ only | Upgrade mode → wrap spec-kit with DevKit |
-| Code, no .devkit/ | Brownfield mode → reconstruct from code |
-| Empty / no code | Greenfield mode → start fresh |
+If `.devkit/` already exists, it safely skips (idempotent).
 
-Read the mode guide:
-- Greenfield: [greenfield.md](references/greenfield.md)
-- Brownfield: [brownfield.md](references/brownfield.md)
-- Upgrade from spec-kit: [upgrade.md](references/upgrade.md)
+## Step 2: Verify State
 
-## Step 2: Create .devkit/ Structure
-
-After determining mode, create the directory structure:
-
-```
-.devkit/
-  research/         ← ResearchKit artifacts
-  product/          ← ProductKit artifacts
-  arch/
-    decisions/      ← ADR, RFC, Investigation files
-  qa/
-    escalations/    ← QA escalation history
+```bash
+devkit status
 ```
 
-## Step 3: Install spec-kit if not present
+Review the output: mode, current phase, progress. This confirms init worked correctly.
+
+## Step 3: Install spec-kit if not present (optional)
 
 Check if `specify` CLI is available:
 
@@ -59,41 +43,32 @@ Check if `specify` CLI is available:
 specify --version
 ```
 
-If not found, output instructions:
+If not found, inform the developer (do not block init):
 ```
-spec-kit not found. Install with:
+Note: spec-kit not found. DevKit works independently.
+If you want SpecKit integration, install with:
   uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
-
 Then run: specify init . --ai claude
 ```
 
-If found but `.specify/` doesn't exist:
+Important: spec-kit installation is optional. DevKit init must succeed regardless of spec-kit availability.
+
+## Step 4: Mode-Specific Setup
+
+For **brownfield** mode, also follow [brownfield.md](references/brownfield.md) to reconstruct invariants from existing code.
+
+For **upgrade** mode, follow [upgrade.md](references/upgrade.md) to extract artifacts from existing constitution.
+
+For **greenfield**, no extra setup needed.
+
+## Step 5: Confirm and Show Next Step
+
 ```bash
-specify init . --ai claude
+devkit status
 ```
 
-## Step 4: Confirm and Show Next Step
+Tell developer what to do next based on detected mode:
 
-After init, tell developer what to do next based on mode:
-
-Greenfield:
-```
-DevKit initialized. 
-Start with: /research-kit
-Describe your idea and we'll explore feasibility together.
-```
-
-Brownfield:
-```
-DevKit initialized in brownfield mode.
-Reconstructed N invariants (review required).
-Next: review .devkit/arch/invariants.md and confirm or correct.
-Then: /arch-kit to fill gaps.
-```
-
-Upgrade:
-```
-DevKit initialized over existing spec-kit project.
-Reconstructed constitution into ArchKit artifacts.
-Next: review .devkit/arch/invariants.md
-```
+- Greenfield: "Start with: /research-kit — describe your idea"
+- Brownfield: "Review .devkit/arch/invariants.md, then /arch-kit to fill gaps"
+- Upgrade: "Review .devkit/arch/invariants.md extracted from constitution"

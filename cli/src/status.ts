@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 export type Phase = 'research' | 'product' | 'arch' | 'spec' | 'qa';
@@ -39,7 +39,6 @@ function parseCheckboxStatus(line: string): PhaseStatus {
 
 function countFiles(dir: string): number {
     try {
-        const { readdirSync } = require('node:fs');
         return readdirSync(dir).filter((f: string) => f.endsWith('.md')).length;
     } catch {
         return 0;
@@ -66,7 +65,12 @@ export function getStatus(cwd: string): DevKitStatus | null {
         if (initMatch) initialized = initMatch[1]!.trim();
 
         const phaseMatch = line.match(/^CURRENT_PHASE:\s*(.+)/);
-        if (phaseMatch) currentPhase = phaseMatch[1]!.trim() as Phase;
+        if (phaseMatch) {
+            const parsed = phaseMatch[1]!.trim();
+            if (PHASE_ORDER.includes(parsed as Phase)) {
+                currentPhase = parsed as Phase;
+            }
+        }
     }
 
     // Parse phase checkboxes

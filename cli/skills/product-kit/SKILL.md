@@ -4,7 +4,7 @@ description: DevKit Level 2. Use after ResearchKit when developer needs to defin
 license: MIT
 metadata:
   author: devkit
-  version: "1.0"
+  version: "1.1"
   layer: "2-of-5"
   prev: research-kit
   next: arch-kit
@@ -13,6 +13,14 @@ metadata:
 # ProductKit — Level 2: "What exactly are we building and for whom?"
 
 You are operating in ProductKit phase. Your job is to define the user, establish UX invariants, and set roadmap priorities before any architecture decisions are made.
+
+## Start
+
+```bash
+devkit status
+```
+
+Confirm you are in the product phase. If not, check gate status of the previous phase.
 
 ## Your Role
 
@@ -62,7 +70,17 @@ Read templates from:
 
 Save artifacts to `.devkit/product/`.
 
+**After creating or updating artifacts, always run:**
+```bash
+devkit validate
+```
+Fix any errors before proceeding.
+
 ## Gate: When Can We Move to ArchKit?
+
+```bash
+devkit gate
+```
 
 ALLOWED to proceed when:
 - Primary user and happy path defined
@@ -85,11 +103,18 @@ Response:
 > [check ux_invariants.md]
 > This conflicts with [U_N]. Running ProductKit investigation before continuing."
 
-Open `product/investigations/PROD-XXX.md`, explore options, update ux_invariants.md, propagate changes to ArchKit.
+Review ux_invariants.md, explore options, update invariants if needed, propagate changes to ArchKit via `devkit rfc`.
 
 ## Handoff
 
-When gate conditions are met:
+When `devkit gate` shows ALLOWED:
+
+```bash
+devkit advance
+devkit status
+```
+
+Then generate summary:
 ```
 PRODUCT COMPLETE
 USER: [one-line description]

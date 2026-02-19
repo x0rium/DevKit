@@ -1,5 +1,5 @@
 import { watch } from 'chokidar';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import chalk from 'chalk';
 import { validateArtifacts, formatValidation } from './validator.js';
 
@@ -22,21 +22,21 @@ export function watchValidate(cwd: string): void {
         },
     });
 
-    watcher.on('change', (path) => {
-        const relative = path.replace(cwd + '/', '');
-        console.log(chalk.cyan(`\n  📝 Changed: ${relative}`));
+    watcher.on('change', (filePath) => {
+        const rel = relative(cwd, filePath);
+        console.log(chalk.cyan(`\n  📝 Changed: ${rel}`));
         runValidation(cwd);
     });
 
-    watcher.on('add', (path) => {
-        const relative = path.replace(cwd + '/', '');
-        console.log(chalk.green(`\n  ➕ Added: ${relative}`));
+    watcher.on('add', (filePath) => {
+        const rel = relative(cwd, filePath);
+        console.log(chalk.green(`\n  ➕ Added: ${rel}`));
         runValidation(cwd);
     });
 
-    watcher.on('unlink', (path) => {
-        const relative = path.replace(cwd + '/', '');
-        console.log(chalk.red(`\n  ➖ Removed: ${relative}`));
+    watcher.on('unlink', (filePath) => {
+        const rel = relative(cwd, filePath);
+        console.log(chalk.red(`\n  ➖ Removed: ${rel}`));
         runValidation(cwd);
     });
 }

@@ -31,6 +31,7 @@ DATE_DECIDED:
 
 ## Post-Decision Actions
 - [ ] Update invariants.md
-- [ ] Regenerate constitution.md
+- [ ] Regenerate constitution (`devkit generate-constitution`)
+- [ ] Sync constitution (`devkit sync`)
 - [ ] Mark affected specs as NEEDS_REVISION
 - [ ] Resume SpecKit
