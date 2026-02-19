@@ -37,11 +37,6 @@ program
         const state = detectProjectState(cwd);
         console.log(`  Detected: ${chalk.cyan(state)} project\n`);
 
-        if (state === 'initialized') {
-            console.log(chalk.yellow('  ⚠ .devkit/ already exists. Use "devkit status" to check progress.'));
-            return;
-        }
-
         const result = scaffoldDevkit(cwd, state);
 
         if (result.created.length > 0) {
