@@ -563,6 +563,85 @@ devkit dashboard --port 8080  # кастомный порт
 
 ---
 
+### `devkit snapshot` — Снимок состояния
+
+Сохраняет SHA-256 снэпшот текущего `.devkit/` для последующего сравнения.
+
+```bash
+devkit snapshot
+```
+
+**Вывод:**
+```
+📸 Snapshot
+
+  ✅ Saved: 2026-02-19_18-39-24_qa.json
+     Phase: qa
+     Files: 13
+     Invariants: 0 tech + 6 UX
+     Coverage: 100%
+
+  Use "devkit diff" to compare with next snapshot.
+```
+
+**Что сохраняется:**
+- SHA-256 хэши всех `.md` файлов в `.devkit/`
+- Количество инвариантов (tech + UX)
+- Количество ADR, RFC, INV, ESC
+- Coverage процент
+
+---
+
+### `devkit snapshot-list` — Список снэпшотов
+
+```bash
+devkit snapshot-list
+```
+
+```
+📸 Snapshots
+
+  [0] 2026-02-19_14-00-00_arch.json
+      Phase: arch │ Files: 8 │ Coverage: 33%
+  [1] 2026-02-19_18-39-24_qa.json
+      Phase: qa │ Files: 13 │ Coverage: 100%
+```
+
+---
+
+### `devkit diff` — Сравнение состояний
+
+Показывает что изменилось: добавленные/изменённые/удалённые файлы + дельты по всем метрикам.
+
+```bash
+devkit diff                # последний снэпшот vs текущее состояние
+devkit diff 0              # снэпшот [0] vs текущее состояние
+devkit diff 0 1            # сравнить два снэпшота по индексу
+```
+
+**Вывод:**
+```
+🔍 Diff
+
+  From: arch (2026-02-19)
+  To:   qa (2026-02-19)
+
+  Files: 5 change(s)
+    ➕ qa/test_contracts.md
+    ➕ qa/escalations/ESC-001.md
+    ✏️  STATUS.md
+    ✏️  product/ux_invariants.md
+
+  Stats:
+    ➖ Technical invariants: =
+    📈 UX invariants: +2
+    📈 RFCs: +1
+    📈 Escalations: +1
+    📈 Coverage: +67%
+```
+
+---
+
 ## Типичные workflow
 
 ### Greenfield проект
