@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync, existsSync, cpSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process';
 
 const STATUS_TEMPLATE = `# DevKit Status
 
@@ -40,6 +41,7 @@ export interface ScaffoldResult {
     skipped: string[];
     mode: string;
     skillsInstalled: number;
+    specKitFound: boolean;
 }
 
 function getSkillsSourceDir(): string | null {
@@ -102,5 +104,9 @@ export function scaffoldDevkit(cwd: string, mode: string): ScaffoldResult {
         }
     }
 
-    return { created, skipped, mode, skillsInstalled };
+    // Check for spec-kit
+    const specKitFound = existsSync(join(cwd, '.specify')) ||
+        (() => { try { execSync('specify --version', { stdio: 'ignore' }); return true; } catch { return false; } })();
+
+    return { created, skipped, mode, skillsInstalled, specKitFound };
 }

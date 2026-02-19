@@ -4,7 +4,7 @@
 
 | Tool | What it does | What it lacks | Our niche |
 |------|-------------|---------------|-----------|
-| **github/spec-kit** (specify-cli) | SDD: specification → plan → tasks → implement. CLI + Agent Skills | Только середина цикла. Нет research, product, QA. Нет инвариантов. Нет event detection. Constitution пишется вручную | DevKit — upstream layer. Генерирует constitution из верифицированных решений |
+| **github/spec-kit** (specify-cli) v0.0.99, MIT, ~70K stars | SDD: 9 slash-команд (`/speckit.constitution` → `.specify` → `.clarify` → `.plan` → `.tasks` → `.analyze` → `.checklist` → `.implement` → `.taskstoissues`). Python CLI (`uv`), 18+ AI-агентов. Constitution в `.specify/memory/constitution.md` с semver. Фичи в `.specify/specs/NNN-name/` с git-ветками | Только середина цикла. Нет research, product, QA. Нет инвариантов. Нет event detection (RFC/INV/ESC). Constitution — принципы, не верифицированные решения | DevKit — upstream layer (L1-L3 + L5). Генерирует constitution из верифицированных инвариантов и решений, передаёт spec-kit для L4 |
 | **Claude Code / Gemini CLI / Codex CLI** | AI-агенты для написания кода в терминале | Нет методологии. Нет фазовой дисциплины. Нет артефактов между фазами | DevKit добавляет методологию поверх любого агента через Agent Skills |
 | **Aider** | AI pair programming, diff-based editing | Чистый coding assistant. Нет архитектуры, research, QA | DevKit покрывает полный цикл |
 | **Cursor / Windsurf** | IDE с встроенным AI | IDE-specific. Нет методологии. Нет артефактов | DevKit — IDE-agnostic через Agent Skills |

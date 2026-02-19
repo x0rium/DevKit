@@ -140,6 +140,7 @@ function checkProductGate(devkitDir: string): GateCondition[] {
 function checkArchGate(devkitDir: string): GateCondition[] {
     const conditions: GateCondition[] = [];
     const archDir = join(devkitDir, 'arch');
+    const cwd = join(devkitDir, '..');
 
     // Invariants exist
     const invPath = join(archDir, 'invariants.md');
@@ -148,11 +149,19 @@ function checkArchGate(devkitDir: string): GateCondition[] {
         satisfied: existsSync(invPath),
     });
 
-    // Constitution generated
+    // Constitution generated (internal)
     const constPath = join(archDir, 'constitution.md');
     conditions.push({
         description: 'Constitution generated (constitution.md)',
         satisfied: existsSync(constPath),
+    });
+
+    // Constitution synced to spec-kit path
+    const specKitConst = join(cwd, '.specify', 'memory', 'constitution.md');
+    conditions.push({
+        description: 'Constitution synced to spec-kit (.specify/memory/constitution.md)',
+        satisfied: existsSync(specKitConst),
+        detail: !existsSync(specKitConst) ? 'Run "devkit sync" to sync constitution' : undefined,
     });
 
     // No unresolved open questions in invariants
@@ -171,20 +180,47 @@ function checkArchGate(devkitDir: string): GateCondition[] {
 // --- SpecKit Gate ---
 function checkSpecGate(devkitDir: string): GateCondition[] {
     const conditions: GateCondition[] = [];
+    const cwd = join(devkitDir, '..');
 
-    // At least one spec implemented
-    const specifyDir = join(devkitDir, '..', '.specify', 'specs');
-    if (existsSync(specifyDir)) {
-        const specs = readdirSync(specifyDir).filter(f => f.endsWith('.md'));
+    // spec-kit specs directory exists with feature dirs (NNN-name/)
+    const specsDir = join(cwd, '.specify', 'specs');
+    if (existsSync(specsDir)) {
+        const featureDirs = readdirSync(specsDir).filter(f => {
+            try {
+                const stat = readdirSync(join(specsDir, f));
+                return stat.length > 0; // has files inside
+            } catch { return false; }
+        });
         conditions.push({
-            description: 'At least one spec implemented',
-            satisfied: specs.length > 0,
-            detail: `${specs.length} spec(s) found`,
+            description: 'At least one spec-kit feature implemented (.specify/specs/NNN-*/)',
+            satisfied: featureDirs.length > 0,
+            detail: featureDirs.length > 0 ? `${featureDirs.length} feature(s): ${featureDirs.join(', ')}` : 'No feature directories found. Use /speckit.specify to create one.',
         });
     } else {
         conditions.push({
-            description: 'Implementation specs exist (.specify/specs/)',
+            description: 'spec-kit specs directory exists (.specify/specs/)',
             satisfied: false,
+            detail: 'Run /speckit.specify to create a feature specification',
+        });
+    }
+
+    // No open RFCs or Investigations
+    const decisionsDir = join(devkitDir, 'arch', 'decisions');
+    if (existsSync(decisionsDir)) {
+        const files = readdirSync(decisionsDir).filter(f => f.endsWith('.md'));
+        let openCount = 0;
+        const openNames: string[] = [];
+        for (const file of files) {
+            const content = readFileSync(join(decisionsDir, file), 'utf-8');
+            if (/STATUS:\s*open/i.test(content)) {
+                openCount++;
+                openNames.push(file.replace('.md', ''));
+            }
+        }
+        conditions.push({
+            description: 'No open RFCs or Investigations',
+            satisfied: openCount === 0,
+            detail: openCount > 0 ? `Open: ${openNames.join(', ')}` : undefined,
         });
     }
 

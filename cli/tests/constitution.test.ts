@@ -83,14 +83,18 @@ describe('syncConstitution', () => {
         expect(result.synced).toBe(false);
     });
 
-    it('creates .specify/ and copies constitution', () => {
-        writeFileSync(join(TEST_DIR, '.devkit', 'arch', 'constitution.md'), '# Constitution\nContent here\n');
+    it('creates .specify/memory/ and syncs constitution in spec-kit format', () => {
+        writeFileSync(join(TEST_DIR, '.devkit', 'arch', 'constitution.md'), '# Constitution\n\n### I1: Idempotent init\n- **Guarantee**: Init is idempotent\n');
 
         const result = syncConstitution(TEST_DIR);
         expect(result.synced).toBe(true);
-        expect(existsSync(join(TEST_DIR, '.specify', 'constitution.md'))).toBe(true);
+        expect(result.to).toBe('.specify/memory/constitution.md');
+        expect(existsSync(join(TEST_DIR, '.specify', 'memory', 'constitution.md'))).toBe(true);
 
-        const content = readFileSync(join(TEST_DIR, '.specify', 'constitution.md'), 'utf-8');
+        const content = readFileSync(join(TEST_DIR, '.specify', 'memory', 'constitution.md'), 'utf-8');
         expect(content).toContain('Constitution');
+        expect(content).toContain('Core Principles');
+        expect(content).toContain('MUST');
+        expect(content).toContain('Version');
     });
 });

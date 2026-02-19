@@ -205,21 +205,80 @@ export function generateConstitution(cwd: string): ConstitutionResult {
     };
 }
 
+function transformToSpecKitFormat(content: string, cwd: string): string {
+    const lines: string[] = [];
+    const now = new Date().toISOString().split('T')[0];
+
+    // Detect project name from package.json or directory
+    let projectName = 'Project';
+    const pkgPath = join(cwd, 'package.json');
+    if (existsSync(pkgPath)) {
+        try {
+            const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+            if (pkg.name) projectName = pkg.name;
+        } catch { /* ignore */ }
+    }
+
+    lines.push(`# ${projectName} Constitution`);
+    lines.push('');
+    lines.push('> Transformed from DevKit invariants. Regenerate with: `devkit generate-constitution && devkit sync`');
+    lines.push('');
+    lines.push('## Core Principles');
+    lines.push('');
+
+    // Extract technical invariants as principles
+    const techSections = content.split(/^### /m).slice(1);
+    let principleNum = 0;
+
+    for (const section of techSections) {
+        const headerLine = section.split('\n')[0]?.trim() ?? '';
+        // Find the guarantee/promise line
+        const guaranteeMatch = section.match(/\*\*Guarantee\*\*:\s*(.+)/);
+        const promiseMatch = section.match(/\*\*Promise\*\*:\s*(.+)/);
+        const statement = guaranteeMatch?.[1] ?? promiseMatch?.[1];
+
+        if (headerLine && statement) {
+            principleNum++;
+            lines.push(`### ${headerLine}`);
+            // If statement already reads as a complete rule, use as-is; otherwise prefix with MUST
+            const normalized = statement.trim();
+            if (/^(the system|all |every |no |any )/i.test(normalized) || /\bMUST\b|\bSHALL\b/i.test(normalized)) {
+                lines.push(normalized);
+            } else {
+                lines.push(`The system MUST: ${normalized}`);
+            }
+            lines.push('');
+        }
+    }
+
+    // Governance
+    lines.push('## Governance');
+    lines.push('');
+    lines.push('- Any deviation from principles above requires an RFC through ArchKit (`devkit rfc`)');
+    lines.push('- New requirements touching invariants must go through impact analysis (`devkit impact`)');
+    lines.push('- Test contracts in QAKit map 1:1 to principles — every principle must be testable');
+    lines.push('- This constitution is regenerated when invariants or decisions change — do not edit manually');
+    lines.push('');
+    lines.push(`**Version**: 1.0.0 | **Ratified**: ${now} | **Last Amended**: ${now}`);
+    lines.push('');
+
+    return lines.join('\n');
+}
+
 export function syncConstitution(cwd: string): { synced: boolean; from: string; to: string; error?: string } {
     const from = join(cwd, '.devkit', 'arch', 'constitution.md');
-    const specifyDir = join(cwd, '.specify');
-    const to = join(specifyDir, 'constitution.md');
+    const memoryDir = join(cwd, '.specify', 'memory');
+    const to = join(memoryDir, 'constitution.md');
 
     if (!existsSync(from)) {
         return { synced: false, from, to, error: 'constitution.md not found. Run "devkit generate-constitution" first.' };
     }
 
-    if (!existsSync(specifyDir)) {
-        mkdirSync(specifyDir, { recursive: true });
-    }
+    mkdirSync(memoryDir, { recursive: true });
 
-    const content = readFileSync(from, 'utf-8');
-    writeFileSync(to, content, 'utf-8');
+    const devkitContent = readFileSync(from, 'utf-8');
+    const specKitContent = transformToSpecKitFormat(devkitContent, cwd);
+    writeFileSync(to, specKitContent, 'utf-8');
 
-    return { synced: true, from: '.devkit/arch/constitution.md', to: '.specify/constitution.md' };
+    return { synced: true, from: '.devkit/arch/constitution.md', to: '.specify/memory/constitution.md' };
 }

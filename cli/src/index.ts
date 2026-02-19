@@ -62,6 +62,14 @@ program
             console.log(chalk.green(`\n  🧠 Agent Skills: ${result.skillsInstalled} installed → .agent/skills/`));
         }
 
+        if (!result.specKitFound) {
+            console.log(chalk.yellow('\n  ⚠️  spec-kit not found. DevKit Level 4 (SpecKit) requires it.'));
+            console.log(chalk.dim('    Install: uv tool install specify-cli --from git+https://github.com/github/spec-kit.git'));
+            console.log(chalk.dim('    Then:    specify init . --ai claude'));
+        } else {
+            console.log(chalk.green('\n  ✅ spec-kit detected'));
+        }
+
         console.log('');
         console.log(chalk.bold('  Next steps:'));
 
@@ -198,14 +206,14 @@ program
         console.log(`     ADR decisions:        ${result.decisionsCount}`);
         console.log(`     Output: .devkit/arch/constitution.md`);
         console.log('');
-        console.log(chalk.dim('  Run "devkit sync" to copy to .specify/constitution.md'));
+        console.log(chalk.dim('  Run "devkit sync" to transform and sync to .specify/memory/constitution.md'));
         console.log('');
     });
 
 // ────────────────────────────── SYNC ──────────────────────────────
 program
     .command('sync')
-    .description('Sync constitution.md → .specify/constitution.md')
+    .description('Sync constitution to spec-kit format → .specify/memory/constitution.md')
     .option('-d, --dir <path>', 'Project directory', process.cwd())
     .action((opts) => {
         const cwd = opts.dir as string;

@@ -1,3 +1,5 @@
-# spec-kit working files (exclude all except constitution.md)
+# spec-kit working files (exclude all except constitution)
 .specify/*
-!.specify/constitution.md
+!.specify/memory/
+.specify/memory/*
+!.specify/memory/constitution.md
