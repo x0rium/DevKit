@@ -23,18 +23,19 @@ DevKit — это **upstream layer** над SpecKit. Не конкурент, н
 ### Установка CLI
 
 ```bash
-cd your-project
+# Через npm (рекомендуется)
+npm i -g @x0rium/devkit-cli
 
-# Склонировать DevKit
-git clone https://github.com/x0rium/DevKit.git /tmp/devkit-src
-
-# Собрать CLI
-cd /tmp/devkit-src/cli
-npm install && npm run build
-
-# Создать алиас (добавить в .zshrc/.bashrc)
-alias devkit="node /tmp/devkit-src/cli/dist/index.js"
+# Или одноразово через npx
+npx @x0rium/devkit-cli init
 ```
+
+> Альтернативно — из исходников:
+> ```bash
+> git clone https://github.com/x0rium/DevKit.git && cd DevKit/cli
+> npm install && npm run build
+> alias devkit="node $(pwd)/dist/index.js"
+> ```
 
 ### Первая сессия
 
@@ -167,6 +168,8 @@ devkit status
     devkit validate
     devkit gate
     devkit advance
+    devkit coverage
+    devkit dashboard
     devkit generate-constitution
     devkit impact "..."
     devkit rfc "..."
@@ -482,6 +485,84 @@ devkit inv-list
 
 ---
 
+### `devkit coverage` — Карта покрытия инвариантов
+
+Показывает какие инварианты покрыты тестами, а какие нет.
+
+```bash
+devkit coverage
+```
+
+**Вывод:**
+```
+📊 Coverage Map
+
+Coverage: 6/6 invariants fully covered (100%)
+
+  [██████████████████████████████] 100%
+
+  UX Invariants:
+    ✅ U1: Zero-config start
+       ↳ qa/test_contracts.md
+       ↳ cli/tests/constitution.test.ts
+    ✅ U2: Status at a glance
+       ↳ qa/test_contracts.md
+       ↳ cli/tests/advance.test.ts
+    ...
+    ❌ U4: Non-invasive integration
+       none
+```
+
+**Статусы:**
+- ✅ **covered** — 2+ источника (тест-файл + test_contracts.md)
+- 🟡 **partial** — 1 источник
+- ❌ **uncovered** — не найдено ни одного упоминания
+
+---
+
+### `devkit watch` — Авто-валидация
+
+Следит за `.devkit/` и автоматически запускает валидацию при изменении файлов.
+
+```bash
+devkit watch
+```
+
+**Вывод:**
+```
+👁️  Watch Mode — Validating on file changes
+
+  Watching: .devkit/**/*.md
+  Press Ctrl+C to stop.
+
+  📝 Changed: .devkit/research/unknowns.md
+  ─── 21:15:32 ───
+  Checked 10 artifact(s)
+  ✅ All clear!
+```
+
+---
+
+### `devkit dashboard` — Веб-дашборд
+
+Открывает веб-интерфейс с полной картиной проекта.
+
+```bash
+devkit dashboard              # порт 3141 по умолчанию
+devkit dashboard --port 8080  # кастомный порт
+```
+
+**Что показывает:**
+- Phase Progress — прогресс по фазам (ResearchKit → QAKit)
+- Coverage — процент покрытия инвариантов тестами
+- Validation — количество ошибок в артефактах
+- Invariant Coverage Map — каждый инвариант + тестовые файлы
+- RFCs / Investigations / Escalations — открытые и закрытые
+
+Все данные live из файловой системы. Auto-refresh каждые 5 секунд.
+
+---
+
 ## Типичные workflow
 
 ### Greenfield проект
@@ -497,6 +578,8 @@ devkit advance                          # → ArchKit
 devkit generate-constitution            # собрать конституцию
 devkit sync                             # → .specify/
 # → Работа через /spec-kit, /qa-kit
+devkit coverage                         # проверить покрытие
+devkit dashboard                        # открыть веб-панель
 ```
 
 ### Новое требование в середине разработки
