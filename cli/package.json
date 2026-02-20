@@ -1,6 +1,6 @@
 {
   "name": "@x0rium/devkit-cli",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "CLI for DevKit — AI-Native Development Methodology",
   "type": "module",
   "files": [

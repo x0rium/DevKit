@@ -17,13 +17,14 @@ import { analyzeCoverage, formatCoverage } from './coverage.js';
 import { watchValidate } from './watch.js';
 import { startDashboard } from './dashboard.js';
 import { takeSnapshot, saveSnapshot, listSnapshots, loadSnapshot, diffSnapshots, formatDiff } from './diff.js';
+import { injectDevkitHooks } from './inject.js';
 
 const program = new Command();
 
 program
     .name('devkit')
     .description('DevKit CLI — AI-Native Development Methodology')
-    .version('0.6.0');
+    .version('0.8.0');
 
 // ────────────────────────────── INIT ──────────────────────────────
 program
@@ -55,6 +56,14 @@ program
 
         if (result.skillsInstalled > 0) {
             console.log(chalk.green(`\n  🧠 Agent Skills: ${result.skillsInstalled} installed → .agent/skills/`));
+        }
+
+        // Inject DevKit hooks into speckit commands
+        const injectResult = injectDevkitHooks(cwd);
+        const commandsInjected = injectResult.created.length + injectResult.injected.length;
+
+        if (commandsInjected > 0) {
+            console.log(chalk.green(`\n  🔗 ${commandsInjected} speckit commands enhanced with DevKit hooks`));
         }
 
         if (!result.specKitFound) {
@@ -672,6 +681,57 @@ program
         console.log(formatDiff(result));
     });
 
+// ────────────────────────────── INJECT ──────────────────────────────
+program
+    .command('inject')
+    .description('Inject DevKit hooks into speckit commands (.claude/commands/)')
+    .option('-d, --dir <path>', 'Project directory', process.cwd())
+    .option('--force', 'Re-inject even if current', false)
+    .action((opts) => {
+        const cwd = opts.dir as string;
+        console.log(chalk.bold('\n🔗 DevKit Inject\n'));
+
+        const result = injectDevkitHooks(cwd, { force: opts.force as boolean });
+
+        if (result.errors.length > 0) {
+            for (const err of result.errors) {
+                console.log(chalk.red(`  ❌ ${err}`));
+            }
+            console.log('');
+            process.exitCode = 1;
+            return;
+        }
+
+        if (result.created.length > 0) {
+            console.log(chalk.green('  Created (from bundle):'));
+            for (const cmd of result.created) {
+                console.log(chalk.green(`    + ${cmd}.md`));
+            }
+        }
+
+        if (result.injected.length > 0) {
+            console.log(chalk.green('  Injected/Updated:'));
+            for (const cmd of result.injected) {
+                console.log(chalk.green(`    ↻ ${cmd}.md`));
+            }
+        }
+
+        if (result.skipped.length > 0) {
+            console.log(chalk.dim('  Already current:'));
+            for (const cmd of result.skipped) {
+                console.log(chalk.dim(`    ✓ ${cmd}.md`));
+            }
+        }
+
+        const total = result.created.length + result.injected.length;
+        if (total > 0) {
+            console.log(chalk.green(`\n  ✅ ${total} speckit commands enhanced with DevKit hooks`));
+        } else {
+            console.log(chalk.dim('\n  All speckit commands already up-to-date.'));
+        }
+        console.log('');
+    });
+
 // ────────────────────────────── HELP (progressive disclosure) ──────────────────────────────
 function getPhaseCommands(phase: Phase): string[] {
     const always = ['status', 'validate', 'gate', 'advance', 'coverage', 'dashboard', 'snapshot', 'diff'];
@@ -680,7 +740,7 @@ function getPhaseCommands(phase: Phase): string[] {
         research: [],
         product: [],
         arch: ['generate-constitution', 'impact "..."', 'rfc "..."', 'investigate "..."'],
-        spec: ['sync', 'impact "..."', 'rfc "..."', 'investigate "..."'],
+        spec: ['sync', 'inject', 'impact "..."', 'rfc "..."', 'investigate "..."'],
         qa: ['escalate "..."', 'rfc-list', 'inv-list'],
     };
 

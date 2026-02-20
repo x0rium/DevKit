@@ -61,10 +61,10 @@ DevKit автоматически определит состояние прое
 
 | Что найдено в проекте | Режим | Что происходит |
 |----------------------|-------|----------------|
-| Пустая папка | Greenfield | Создаёт .devkit/ + .specify/, старт с ResearchKit |
+| Пустая папка | Greenfield | Создаёт .devkit/, инжектит speckit-команды, старт с ResearchKit |
 | Код без .devkit/ | Brownfield | Реконструирует инварианты из кода, выявляет gaps |
 | .specify/ без .devkit/ | Upgrade | Извлекает артефакты из constitution.md, связывает |
-| .devkit/ уже есть | Status | Показывает текущее состояние |
+| .devkit/ уже есть | Re-init | Пропускает существующее, обновляет skills и speckit-хуки |
 
 ---
 
@@ -123,12 +123,16 @@ devkit init
     + .devkit/qa/escalations/
     + .devkit/STATUS.md
 
+  🧠 Agent Skills: 6 installed → .agent/skills/
+
+  🔗 7 speckit commands enhanced with DevKit hooks
+
   Next steps:
     Start with: /research-kit
     Describe your idea and explore feasibility.
 ```
 
-Команда идемпотентна — повторный вызов ничего не ломает.
+Команда идемпотентна — повторный вызов ничего не ломает. При инициализации автоматически инжектятся DevKit-хуки в speckit-команды (`.claude/commands/speckit.*.md`).
 
 ---
 
@@ -642,12 +646,67 @@ devkit diff 0 1            # сравнить два снэпшота по ин�
 
 ---
 
+### `devkit inject` — Инжекция DevKit-хуков в speckit-команды
+
+Автоматически инжектит DevKit-хуки (impact analysis, validate, coverage) в speckit slash-команды. Вызывается автоматически при `devkit init`, но можно запустить вручную.
+
+```bash
+devkit inject           # инжектировать / обновить хуки
+devkit inject --force   # переписать даже если хуки актуальны
+```
+
+**Вывод (первый запуск):**
+```
+🔗 DevKit Inject
+
+  Created (from bundle):
+    + speckit.specify.md
+    + speckit.clarify.md
+    + speckit.plan.md
+    + speckit.tasks.md
+    + speckit.implement.md
+    + speckit.analyze.md
+    + speckit.checklist.md
+
+  ✅ 7 speckit commands enhanced with DevKit hooks
+```
+
+**Повторный запуск:**
+```
+🔗 DevKit Inject
+
+  Already current:
+    ✓ speckit.specify.md
+    ✓ speckit.clarify.md
+    ...
+
+  All speckit commands already up-to-date.
+```
+
+**Какие хуки инжектятся:**
+
+| Команда | Хук | Что делает |
+|---------|-----|------------|
+| speckit.specify | invariant-guard | Маппит фичу на инварианты, `devkit impact`, `devkit validate` |
+| speckit.clarify | invariant-check | Флагает если кларификация задевает инвариант, предлагает `devkit rfc` |
+| speckit.plan | constitution-precheck | `devkit validate` перед планированием |
+| speckit.plan | plan-postcheck | `devkit validate` + `devkit impact` после плана |
+| speckit.tasks | validate-checkpoints | Добавляет checkpoint-задачи `devkit validate` между фазами |
+| speckit.implement | phase-guards | `devkit impact` перед архитектурными задачами, `devkit investigate` при сбоях |
+| speckit.analyze | coverage-pass | Добавляет detection pass G: покрытие инвариантов через `devkit coverage` |
+| speckit.checklist | invariant-category | Обязательная категория "DevKit Invariant Coverage" в чеклисте |
+
+**Механизм:** хуки обёрнуты маркерами `<!-- DEVKIT:START:hook-name -->` / `<!-- DEVKIT:END:hook-name -->` для идемпотентности. При повторном запуске обновляется только содержимое между маркерами — остальной контент файла сохраняется.
+
+---
+
 ## Типичные workflow
 
 ### Greenfield проект
 
 ```bash
-devkit init                             # создать .devkit/
+specify init . --ai claude              # установить spec-kit (.specify/)
+devkit init                             # создать .devkit/ + инжектить хуки в speckit-команды
 # → Работа с AI через /research-kit
 devkit validate                         # проверить артефакты
 devkit gate                             # готовы ли к следующей фазе?
@@ -656,7 +715,8 @@ devkit advance                          # перейти к ProductKit
 devkit advance                          # → ArchKit
 devkit generate-constitution            # собрать конституцию
 devkit sync                             # → .specify/
-# → Работа через /spec-kit, /qa-kit
+# → Работа через /speckit.specify, /speckit.plan, /speckit.tasks ...
+#   (speckit-команды теперь DevKit-aware: impact, validate, coverage)
 devkit coverage                         # проверить покрытие
 devkit dashboard                        # открыть веб-панель
 ```
@@ -745,6 +805,15 @@ AI в процессе диалога распознаёт тип события
 
 .specify/                 ← github/spec-kit (не редактировать вручную)
   constitution.md         ← OWNED BY ArchKit, не редактировать
+
+.claude/commands/         ← speckit slash-команды с DevKit-хуками
+  speckit.specify.md      ← /speckit.specify + invariant-guard
+  speckit.clarify.md      ← /speckit.clarify + invariant-check
+  speckit.plan.md         ← /speckit.plan + constitution-precheck + plan-postcheck
+  speckit.tasks.md        ← /speckit.tasks + validate-checkpoints
+  speckit.implement.md    ← /speckit.implement + phase-guards
+  speckit.analyze.md      ← /speckit.analyze + coverage-pass
+  speckit.checklist.md    ← /speckit.checklist + invariant-category
 ```
 
 ---
@@ -763,6 +832,16 @@ DevKit не заменяет spec-kit. SpecKit — это уровень 4 эк�
   ArchKit генерирует constitution.md из верифицированных решений
   SpecKit получает доказанное основание
   AI не может отклониться — инварианты зафиксированы
+```
+
+**Интеграция через `devkit inject`:**
+
+`devkit init` автоматически инжектит DevKit-хуки в speckit slash-команды (`.claude/commands/speckit.*.md`). Это превращает стандартный spec-kit workflow в DevKit-aware: каждая speckit-команда теперь запускает `devkit validate`, `devkit impact`, `devkit coverage` в нужных точках. Spec-kit продолжает работать как execution engine, а DevKit обеспечивает контроль инвариантов.
+
+```
+specify init . --ai claude     # ① spec-kit: скрипты, шаблоны, memory
+devkit init                    # ② devkit: .devkit/ + хуки → speckit-команды
+/speckit.specify ...           # ③ speckit-команда запускает devkit impact/validate
 ```
 
 ---
